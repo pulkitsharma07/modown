@@ -16,17 +16,19 @@ def download(url,save_as)
     Net::HTTP.new(url.host, url.port).request_get(url.path) do |response|
       length = thread[:length] = response['Content-Length'].to_i
       puts " size = #{(length/(1000000.0))} MB "
-      response.read_body do |fragment|
-        body << fragment
-        thread[:done] = (thread[:done] || 0) + fragment.length
-        thread[:progress] = thread[:done].quo(length) * 100
-      end
 
       open(save_as, "wb") do |file|
-        file.write(body.join)
+        response.read_body do |fragment|
+          body << fragment
+          file.write(fragment)
+          thread[:progress] = thread[:done].quo(length) * 100
+        end
       end
+
     end
+
   end
+
 end
 
 
