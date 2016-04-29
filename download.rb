@@ -2,25 +2,51 @@ require 'net/http'
 require 'nokogiri'
 require 'zip'
 
+# Downloads a file at a given url and writes it to disk.
+# Taken from - https://gist.github.com/Burgestrand/454926
+# @param url [URL] the url of the file to download
+# @param save_as [string] the name/path of the file to save , along with the extension
+# @return [void]
+def download(url,save_as)
+  Thread.new do
+    thread = Thread.current
+    body = thread[:body] = []
+
+    url = URI.parse url
+    Net::HTTP.new(url.host, url.port).request_get(url.path) do |response|
+      length = thread[:length] = response['Content-Length'].to_i
+      puts " size = #{(length/(1000000.0))} MB "
+      response.read_body do |fragment|
+        body << fragment
+        thread[:done] = (thread[:done] || 0) + fragment.length
+        thread[:progress] = thread[:done].quo(length) * 100
+      end
+
+      open(save_as, "wb") do |file|
+        file.write(body.join)
+      end
+    end
+  end
+end
+
+
+
 # Downloads the model from archive3D and saves it in a zip file.
 #
 # @param model_id [String] The `id` of the model to download
 # @return [void]
 def download_model(model_id)
 
-  puts "Please wait downloading Model"
+  print "Please wait downloading Model "
 
   begin
 
     file_location = Net::HTTP.get_response(URI.parse("http://www.archive3d.net/?a=download&do=get&id="+model_id))['location']
-    file_contents = Net::HTTP.get_response(URI.parse(file_location))
-
-    open(model_id+".zip", "wb") do |file|
-      file.write(file_contents.body)
-    end
+    thread = download(file_location,model_id+".zip")
+    print "#{thread[:progress].to_i}% done \r" until thread.join 1
 
   rescue
-    puts "ERROR downloading"
+    puts "ERROR downloading file "
   else
     puts model_id+" downloaded !"
   end
@@ -60,7 +86,7 @@ def search_models(name,count=1)
     page = Nokogiri::HTML(Net::HTTP.get_response(URI.parse("http://www.archive3d.net/?tag="+name)).body)
 
   rescue
-    puts "There was problem contacting archive3d"
+    puts "There was problem contacting archive3d",$!
   else
     count.times do |x|
       x = x+1
@@ -92,4 +118,4 @@ def get_models(name,count=1,format="*.3[Dd][Ss]")
   end
 end
 
-get_models("vase",2,"*.3[Dd][Ss]")
+get_models "pipe",2
