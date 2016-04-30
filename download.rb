@@ -1,6 +1,33 @@
 require 'net/http'
 require 'nokogiri'
 require 'zip'
+require 'optparse'
+
+
+options = {:input => nil,:count => 1}
+
+parser = OptionParser.new do|opts|
+
+  opts.banner = "Usage: download.rb [options]"
+
+  opts.on('-i', '--input INPUT', 'The search term') do |input|
+    options[:input] = input;
+  end
+
+  opts.on('-c', '--count COUNT', Integer, 'Number of different models you want') do |count|
+    options[:count] = count;
+  end
+
+  opts.on('-h', '--help', 'Displays Help') do
+    puts opts
+    exit
+  end
+end
+
+parser.parse!
+
+raise "[ERROR] Please provide the INPUT using -i flag" if options[:input].nil?
+
 
 # Downloads a file at a given url and writes it to disk.
 # Taken from - https://gist.github.com/Burgestrand/454926
@@ -21,6 +48,7 @@ def download(url,save_as)
         response.read_body do |fragment|
           body << fragment
           file.write(fragment)
+          thread[:done] = (thread[:done] || 0) + fragment.length
           thread[:progress] = thread[:done].quo(length) * 100
         end
       end
@@ -48,7 +76,7 @@ def download_model(model_id)
     print "#{thread[:progress].to_i}% done \r" until thread.join 1
 
   rescue
-    puts "ERROR downloading file "
+    puts "Can't download model"
   else
     puts model_id+" downloaded !"
   end
@@ -66,9 +94,19 @@ end
 # @return [void]
 def get_model_from_zip(input_zip,output_file,format)
 
-  Zip::File.open(input_zip) do |zip_file|
-    entry = zip_file.glob(format).first
-    entry.extract(output_file+"."+entry.name.split('.')[1])
+  begin
+    Zip::File.open(input_zip) do |zip_file|
+      entry = zip_file.glob(format).first
+
+      begin
+        entry.extract(output_file+"."+entry.name.split('.')[1])
+      rescue Zip::DestinationFileExistsError
+
+      end
+
+    end
+  rescue
+    puts "Error opening ZIP file"
   end
 end
 
@@ -120,4 +158,5 @@ def get_models(name,count=1,format="*.3[Dd][Ss]")
   end
 end
 
-get_models "pipe",2
+
+get_models(options[:input],options[:count])
