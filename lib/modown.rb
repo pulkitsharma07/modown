@@ -1,58 +1,22 @@
-require "modown/version"
+require 'modown/version'
+require 'modown/options'
 require 'net/http'
 require 'nokogiri'
 require 'zip'
-require 'optparse'
 
 module Modown
-
+  # The CLI is a class responsible of handling all the command line interface
+  # logic.
   class CLI
-
     def initialize
-      @options = { input: nil, count: 1, format: '*' }
-
-      # Dont know how to do case-insensitive glob matching
-      @formats_glob = {}
-      @formats_glob['3ds'] = '*.3[Dd][Ss]'
-      @formats_glob['max'] = '*.[Mm][Aa][Xx]'
-      @formats_glob['gsm'] = '*.[Gg][Ss][Mm]'
-      @formats_glob['mtl'] = '*.[Mm][Tt][Ll]'
-      @formats_glob['*'] = '*'
+      @options = {}
     end
 
-    def run
-
-      parser = OptionParser.new do |opts|
-        opts.banner = 'Usage: download.rb [options]'
-
-        opts.on('-i', '--input INPUT', 'The search term') do |input|
-          @options[:input] = input
-        end
-
-        opts.on('-c', '--count COUNT', Integer, 'Number of different models you want') do |count|
-          @options[:count] = count
-        end
-
-        opts.on('-f', '--format FORMAT', "The file format you want. Supported formats are [#{@formats_glob.keys.join(',')}]. \n If this flag is not provided then all the available formats are presented to the user") do |format|
-          @options[:format] = @formats_glob[format]
-        end
-
-        opts.on('-h', '--help', 'Displays Help') do
-          puts opts
-          exit
-        end
-      end
-
-      parser.parse!
-
-      raise '[ERROR] Please provide the INPUT using -i flag' if @options[:input].nil?
-      raise "[ERROR] Please provide a valid format for the -f flag. Supported formats are [#{@formats_glob.keys.join(',')}]" if @options[:format].nil?
-
-
+    def run(args = ARGV)
+      @options = Options.new.parse(args)
       get_models(@options[:input], @options[:count], @options[:format])
 
     end
-
 
     # Downloads a file at a given url and writes it to disk.
     # Taken from - https://gist.github.com/Burgestrand/454926
