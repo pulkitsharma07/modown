@@ -119,9 +119,9 @@ module Modown
     # @param format [String] the glob pattern of the desired 3D model file format
     # @return [void]
     def get_models(name, count = 1, format = '*.3[Dd][Ss]')
-      search_models(name, count).each do |id|
-        download_model(id)
-        get_model_from_zip(id + '.zip', name + '_' + id, format)
+      self.class.search_models(name, count).each do |id|
+        self.class.download_model(id)
+        self.class.get_model_from_zip(id + '.zip', name + '_' + id, format)
       end
     end
   end
