@@ -23,7 +23,7 @@ module Modown
     # @param url [URL] the url of the file to download
     # @param save_as [string] the name/path of the file to save , along with the extension
     # @return [void]
-    def download(url, save_as)
+    def self.download(url, save_as)
       Thread.new do
         thread = Thread.current
         url = URI.parse(url)
@@ -45,7 +45,7 @@ module Modown
     #
     # @param model_id [String] The `id` of the model to download
     # @return [void]
-    def download_model(model_id)
+    def self.download_model(model_id)
       print 'Please wait downloading Model'
       begin
 
@@ -69,7 +69,7 @@ module Modown
     # @param output_file [String] the desired name of the model file.
     # @param format [String] glob pattern for any of the 3D file formats ( for example <tt>".3[Dd][Ss]"</tt>)
     # @return [void]
-    def get_model_from_zip(input_zip, output_file, format = '*')
+    def self.get_model_from_zip(input_zip, output_file, format = '*')
       begin
         Zip::File.open(input_zip) do |zip_file|
           matches = zip_file.glob(format)
@@ -87,7 +87,7 @@ module Modown
     # @param name [String] something you want to search , for example "dog", "table", etc
     # @param count [Integer] the number of models you want. The number of actual models returned are always <= count
     # @return [Array<String>] the list of the model_ids
-    def search_models(name, count = 1)
+    def self.search_models(name, count = 1)
       id_list = []
       begin
 
