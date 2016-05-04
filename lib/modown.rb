@@ -15,13 +15,12 @@ module Modown
     def run(args = ARGV)
       @options = Options.new.parse(args)
       get_models(@options[:input], @options[:count], @options[:format])
-
     end
 
     # Downloads a file at a given url and writes it to disk.
     # Taken from - https://gist.github.com/Burgestrand/454926
     # @param url [URL] the url of the file to download
-    # @param save_as [string] the name/path of the file to save , along with the extension
+    # @param save_as [string] the name/path of the file to save, along with the extension
     # @return [void]
     def self.download(url, save_as)
       Thread.new do
@@ -47,14 +46,16 @@ module Modown
     # @return [void]
     def self.download_model(model_id)
       print 'Please wait downloading Model'
+      download_url = 'http://www.archive3d.net/?a=download&do=get&id='
       begin
 
-        file_location = Net::HTTP.get_response(URI.parse('http://www.archive3d.net/?a=download&do=get&id=' + model_id))['location']
+        response = Net::HTTP.get_response(URI.parse(download_url + model_id))
+        file_location = response['location']
         thread = download(file_location, model_id + '.zip')
-        print "#{thread[:progress].to_i}% done \r" until thread.join 1
+        print "#{thread[:progress].to_i}% \r" until thread.join 1
 
       rescue
-        puts "Can't download model",$!
+        puts "Can't download model", $!
       else
         puts model_id + ' downloaded !'
       end
@@ -70,16 +71,18 @@ module Modown
     # @param format [String] glob pattern for any of the 3D file formats ( for example <tt>".3[Dd][Ss]"</tt>)
     # @return [void]
     def self.get_model_from_zip(input_zip, output_file, format = '*')
-      begin
-        Zip::File.open(input_zip) do |zip_file|
-          matches = zip_file.glob(format)
-          matches.each do |entry|
-            entry.extract(output_file + '.' + entry.name.split('.')[1..-1].join('.')) rescue Zip::DestinationFileExistsError
+      Zip::File.open(input_zip) do |zip_file|
+        matches = zip_file.glob(format)
+        matches.each do |entry|
+          begin
+            extension = entry.name.split('.')[1..-1].join('.')
+            entry.extract(output_file + '.' + extension)
+          rescue Zip::DestinationFileExistsError
           end
         end
-      rescue
-        puts 'Error opening ZIP file',$!
       end
+    rescue
+      puts 'Error opening ZIP file',$!
     end
 
     # This methods searches for 3D models on archive3D.net and returns a list of model_ids
@@ -89,9 +92,10 @@ module Modown
     # @return [Array<String>] the list of the model_ids
     def self.search_models(name, count = 1)
       id_list = []
+      search_url = 'http://www.archive3d.net/?tag='
       begin
 
-        page = Nokogiri::HTML(Net::HTTP.get_response(URI.parse('http://www.archive3d.net/?tag=' + name)).body)
+        page = Nokogiri::HTML(Net::HTTP.get_response(URI.parse(search_url + name)).body)
 
       rescue
         puts 'There was problem contacting archive3d', $!
@@ -99,11 +103,12 @@ module Modown
         count.times do |x|
           x += 1
           begin
-            id = page.css("#prevtable > div:nth-child(#{x}) > div > a")[0]['href'].split('id=')[1]
+            element = page.css("#prevtable > div:nth-child(#{x}) > div > a")[0]
+            model_id = element['href'].split('id=')[1]
           rescue
 
           else
-            id_list << id
+            id_list << model_id
           end
         end
       end

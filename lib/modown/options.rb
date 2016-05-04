@@ -1,13 +1,11 @@
 require 'optparse'
 
 module Modown
-
-  #This class handles command line options
+  # This class handles command line options
   class Options
 
     def initialize
       @options = { input: nil, count: 1, format: '*' }
-
 
       # Dont know how to do case-insensitive glob matching
       @formats_glob = {}
