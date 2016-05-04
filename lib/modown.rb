@@ -45,7 +45,7 @@ module Modown
     # @param model_id [String] The `id` of the model to download
     # @return [void]
     def self.download_model(model_id)
-      print 'Please wait downloading Model'
+      puts 'Please wait downloading Model'
       download_url = 'http://www.archive3d.net/?a=download&do=get&id='
       begin
 
@@ -56,8 +56,10 @@ module Modown
 
       rescue
         puts "Can't download model", $!
+        0
       else
         puts model_id + ' downloaded !'
+        1
       end
     end
 
@@ -75,14 +77,19 @@ module Modown
         matches = zip_file.glob(format)
         matches.each do |entry|
           begin
-            extension = entry.name.split('.')[1..-1].join('.')
-            entry.extract(output_file + '.' + extension)
+
+            file_complete_name = entry.name.split('.')
+            file_name = file_complete_name[0]
+            extension = file_complete_name[1..-1].join('.').downcase
+            entry.extract(output_file + "_" + file_name + '.' + extension)
           rescue Zip::DestinationFileExistsError
           end
         end
       end
+      1
     rescue
-      puts 'Error opening ZIP file',$!
+      puts 'Error opening ZIP file'
+      0
     end
 
     # This methods searches for 3D models on archive3D.net and returns a list of model_ids
