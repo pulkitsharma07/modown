@@ -16,6 +16,9 @@ module Modown
       @formats_glob['*'] = '*'
     end
 
+    # Parse the command line arguments
+    # @param args [command_line_arguments]
+    # @return [Hash]
     def parse(args)
       parser = OptionParser.new do |opts|
         opts.banner = 'Usage: download.rb [options]'

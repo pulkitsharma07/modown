@@ -4,6 +4,7 @@ require 'net/http'
 require 'nokogiri'
 require 'zip'
 
+# The main module.
 module Modown
   # The CLI is a class responsible of handling all the command line interface
   # logic.
@@ -12,6 +13,7 @@ module Modown
       @options = {}
     end
 
+    # This method is the entry point for the command-line app
     def run(args = ARGV)
       @options = Options.new.parse(args)
       get_models(@options[:input], @options[:count], @options[:format])
@@ -43,15 +45,16 @@ module Modown
     # Downloads the model from archive3D and saves it in a zip file.
     #
     # @param model_id [String] The `id` of the model to download
+    # @param save_to [String] Where to save the file.
     # @return [void]
-    def self.download_model(model_id)
+    def self.download_model(model_id,save_to="")
       puts 'Please wait downloading Model'
       download_url = 'http://www.archive3d.net/?a=download&do=get&id='
       begin
 
         response = Net::HTTP.get_response(URI.parse(download_url + model_id))
         file_location = response['location']
-        thread = download(file_location, model_id + '.zip')
+        thread = download(file_location, save_to + model_id + '.zip')
         print "#{thread[:progress].to_i}% \r" until thread.join 1
 
       rescue
