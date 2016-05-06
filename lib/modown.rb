@@ -16,7 +16,8 @@ module Modown
     # This method is the entry point for the command-line app
     def run(args = ARGV)
       @options = Options.new.parse(args)
-      get_models(@options[:input], @options[:count], @options[:format])
+
+      get_models(@options[:search_term], @options[:count], @options[:format])
     end
 
     # Downloads a file at a given url and writes it to disk.

@@ -21,11 +21,7 @@ module Modown
     # @return [Hash]
     def parse(args)
       parser = OptionParser.new do |opts|
-        opts.banner = 'Usage: download.rb [options]'
-
-        opts.on('-i', '--input INPUT', 'The search term') do |input|
-          @options[:input] = input
-        end
+        opts.banner = 'Usage: modown [options] Object'
 
         opts.on('-c', '--count COUNT', Integer, 'Number of different models you want') do |count|
           @options[:count] = count
@@ -46,9 +42,11 @@ module Modown
 
       parser.parse!(args)
 
-      raise '[ERROR] Please provide the INPUT using -i flag' if @options[:input].nil?
+      raise '[ERROR] Please provide the object to search' if args.length == 0
       raise "[ERROR] Please provide a valid format for the -f flag.
       Supported formats are [#{@formats_glob.keys.join(',')}]" if @options[:format].nil?
+
+      @options[:search_term] = args[0]
 
       @options
     end
