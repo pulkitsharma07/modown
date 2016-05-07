@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'fakefs/spec_helpers'
 require 'pp'
 
-describe Modown::CLI , fakefs: true do
+describe Modown , fakefs: true do
 
   include FakeFS::SpecHelpers
 
@@ -11,7 +11,7 @@ describe Modown::CLI , fakefs: true do
     context "when model_id is valid" do
 
       it "should download model from 3Darchive and store it on the disk" do
-        expect(Modown::CLI.download_model("6384f7c8")).to be(1)
+        expect(Modown::download_model("6384f7c8")).to be(1)
         expect(File).to exist("6384f7c8.zip")
       end
 
@@ -21,7 +21,7 @@ describe Modown::CLI , fakefs: true do
     context "when model_id is invalid" do
 
       it "should return 0" do
-        expect(Modown::CLI.download_model("6384mm8")).to be(0)
+        expect(Modown::download_model("6384mm8")).to be(0)
       end
 
     end
@@ -51,7 +51,7 @@ describe Modown::CLI , fakefs: true do
 
         $tmp_dir = ""
         FakeFS.activate!
-        Modown::CLI.download_model($model_id)
+        Modown::download_model($model_id)
 
       end
 
@@ -60,7 +60,7 @@ describe Modown::CLI , fakefs: true do
 
 
     it "should extract everything from the file" do
-      Modown::CLI.get_model_from_zip($zip_file,$tmp_dir + "/test")
+      Modown::get_model_from_zip($zip_file,$tmp_dir + "/test")
 
       expect(File).to exist($location + "test_Labyrinth.3ds")
       expect(File).to exist($location + "test_Labyrinth.gsm")
