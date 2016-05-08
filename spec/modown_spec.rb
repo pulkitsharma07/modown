@@ -31,13 +31,14 @@ describe Modown , fakefs: true do
 
   describe "#get_model_from_zip" do
 
-    $model_id = "6384f7c8"
-    $zip_file = $model_id + '.zip'
-    $location = ""
-    $tmp_dir = "tmp/model_file"
 
 
     before do
+
+      $model_id = "6384f7c8"
+      $zip_file = $model_id + '.zip'
+      $location = ""
+      $tmp_dir = "tmp/model_file"
 
       puts "Please wait , preparing the test"
       FakeFS.deactivate!
@@ -66,11 +67,28 @@ describe Modown , fakefs: true do
       expect(File).to exist($location + "test_Labyrinth.gsm")
       expect(File).to exist($location + "test_archibase.net.txt")
     end
-  end
+
+    it "should extract only the 3ds file" do
+      Modown::get_model_from_zip($zip_file,$tmp_dir + "/test",'*.3[Dd][Ss]')
+
+      expect(File).to exist($location + "test_Labyrinth.3ds")
+      expect(File).to_not exist($location + "test_Labyrinth.gsm")
+      expect(File).to_not exist($location + "test_archibase.net.txt")
+    end
 
 
-  after do
-    Dir.glob(Dir.pwd + "/"+ $tmp_dir+"/*").each {|f| File.delete(f) unless f.end_with? "zip"}
+    it "should extract only the gsm file" do
+      Modown::get_model_from_zip($zip_file,$tmp_dir + "/test",'*.[Gg][Ss][Mm]')
+
+      expect(File).to_not exist($location + "test_Labyrinth.3ds")
+      expect(File).to exist($location + "test_Labyrinth.gsm")
+      expect(File).to_not exist($location + "test_archibase.net.txt")
+    end
+
+
+    after(:each) do
+      Dir.glob(Dir.pwd + "/"+ $tmp_dir+"/*").each {|f| File.delete(f) unless f.end_with? "zip"}
+    end
   end
 
 end
