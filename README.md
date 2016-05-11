@@ -18,7 +18,7 @@ where OBJECT is the name of the thing you want to download.
 
 Supports Options are
 * `--count,-c` The number of different models you want
-* `--format,-f` The file format you want, supported formats are `[3ds,max,gsm,mtl]` *Defaults to `*`*
+* `--format,-f` The file format you want, supported formats are `[3ds,max,gsm,mtl]`,  Defaults to `*`
 
 
 ## Development
