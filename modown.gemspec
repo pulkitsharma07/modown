@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["avastpulkit@gmail.com"]
 
   spec.summary       = %q{Download 3D models.}
-  spec.homepage      = "TODO: Put your gem's website or public repo URL here."
+  spec.homepage      = "https://github.com/pulkitsharma07/modown"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
