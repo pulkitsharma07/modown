@@ -17,7 +17,7 @@ where OBJECT is the name of the thing you want to download.
 	$ modown guitar
 
 Supports Options are
-* `--count,-c` The number of different models you want
+* `--count,-c` The number of different models you want, Defaults to `1`
 * `--format,-f` The file format you want, supported formats are `[3ds,max,gsm,mtl]`,  Defaults to `*`
 
 
